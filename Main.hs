@@ -3,6 +3,7 @@
 
 module Main where
 
+import Control.Concurrent
 import Control.Lens
 import Data.Aeson (FromJSON, toJSON)
 import Data.Aeson.Lens (key, nth)
@@ -38,13 +39,9 @@ type Repos = [Repo]
 
 type PageOfRepos = [Repos]
 
-userData :: String
+userData, userRepos, userStarred :: String
 userData = "https://github.com/%s/%s"
-
-userRepos :: String
 userRepos = "https://api.github.com/users/%s/repos?page=%d"
-
-userStarred :: String
 userStarred = "https://api.github.com/user/starred/%s"
 
 packStr'' :: String -> B.ByteString
@@ -73,8 +70,10 @@ getAllReposFromUser user n token = do
   nextPage <- getUserReposFromPage user (n + 1) token
   return $ repos ++ nextPage
 
-starRepo :: String -> String -> IO Status
+starRepo :: String -> String -> IO ()
 starRepo token name = do
+  putStrLn $ "Starring: " ++ name
+
   r <-
     putWith
       ( defaults
@@ -85,10 +84,10 @@ starRepo token name = do
       (printf userStarred name :: String)
       (packStr'' "")
 
-  return $ r ^. responseStatus
+  return ()
 
 star :: Repos -> String -> IO ()
-star pages token = mapM_ (starRepo token . full_name) pages
+star pages token = mapM_ (forkIO . starRepo token . full_name) pages
 
 trimNewLine :: String -> String
 trimNewLine = reverse . dropWhile (== '\n') . reverse
