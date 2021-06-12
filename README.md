@@ -5,7 +5,7 @@
 ```shell
 git clone https://github.com/willdoescode/star-it-hs.git
 cd star-it-hs
-cabal build
+cabal build --ghc-options "-threaded"
 
 ./path
 ```

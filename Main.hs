@@ -74,7 +74,7 @@ starRepo :: String -> String -> IO ()
 starRepo token name = do
   putStrLn $ "Starring: " ++ name
 
-  r <-
+  _ <-
     putWith
       ( defaults
           & header "Accept" .~ ["application/vnd.github.v3+json"]
@@ -87,7 +87,7 @@ starRepo token name = do
   return ()
 
 star :: Repos -> String -> IO ()
-star pages token = mapM_ (forkIO . starRepo token . full_name) pages
+star pages token = mapM_ (forkOS . starRepo token . full_name) pages
 
 trimNewLine :: String -> String
 trimNewLine = reverse . dropWhile (== '\n') . reverse
